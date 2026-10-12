@@ -56,7 +56,7 @@
 
 <header>
   <h1>Relay — where every fee goes</h1>
-  <div class="sub">1.50% both phases · collected internally, split by relay · rates verified on-chain</div>
+  <div class="sub">1.50% both phases · collected internally, split by relay · post-migration rates configured</div>
 </header>
 
 <div id="controls">
@@ -93,6 +93,7 @@
 
 <script>
 const TIERS = {
+  "machinefun": {trade:0.46875, creator:1.03125, label:"machine.fun — 1.50% total"},
   "627Jx6eN61Tr": {trade:0.250, creator:1.250, label:"627Jx6eN61Tr — 1.25% creator"},
   "2fGXL8uhqxJ4": {trade:2.000, creator:0.050, label:"2fGXL8uhqxJ4 — 2.00% trade"},
   "CRRS5ieQmBrZ": {trade:0.250, creator:1.000, label:"CRRS5ieQmBrZ — stonkfun"},
@@ -107,10 +108,10 @@ const CURVE_RAY = 0.25, CURVE_US = 1.25;
    but us — and relay performs every payout. */
 const SPLIT = {
   curve: {creator:0.50, rewards:0.00, mf:0.75},
-  pool:  {creator:0.50, rewards:0.25, mf:0.71}
+  pool:  {creator:0.50, rewards:0.25, mf:0.675}
 };
 
-let vol = 10000, tier = "627Jx6eN61Tr", mode = "shared", animOn = true;
+let vol = 10000, tier = "machinefun", mode = "shared", animOn = true;
 
 const sel = d3.select("#tier");
 sel.selectAll("option").data(Object.entries(TIERS)).join("option")
@@ -177,7 +178,7 @@ function nodes(m, per){
     detail:"Paid by RELAY, not by Raydium.\n\nSetting creatorFeeRate = 0 gives up the [creator, quote] vault that only the creator could drain. The 0.50% is now a promise this program keeps rather than one the chain enforces — the one place this structure is less verifiable than the alternative."});
   add("prewards",{x:890,y:392,label:"rewards",sub:"0.25% pool only",kind:"pay",
     detail:"Pool phase only; zero on the curve.\n\nDestination not yet decided — treasury PDA, staking program, or buyback. Drawn as a generic sink until that is settled."});
-  add("pmf",{x:890,y:484,label:"MF",sub:"0.75% curve / 0.71% pool",kind:"pay",
+  add("pmf",{x:890,y:484,label:"MF",sub:"0.75% curve / 0.675% pool",kind:"pay",
     detail:"Takes the residual, and deliberately absorbs the LP harvest — which returns BOTH mints. Creator and rewards are paid from the quote-denominated creator fee so neither is exposed to the launch token."});
 
   add("trader2",{x:88,y:596,label:"trader",sub:"pool swap",kind:"actor",
@@ -244,11 +245,11 @@ function graph(){
   // ── payouts: relay splits what it collected, both phases
   const cP = payouts(m,"curve"), pP = payouts(m,"pool");
   e("admin","pcreator", cP.creator.amt+pP.creator.amt, 0.50, {kind:"pay",name:"creator payout",
-     note:"0.50% in BOTH phases, paid in the quote mint. Curve: 4000 of 10000 bps. Pool: 3425 of 10000 bps. Relay's obligation, not Raydium's."});
+     note:"0.50% in BOTH phases, paid in the quote mint. Curve: 4000 of 10000 bps. Pool: 3509 of 10000 bps. Relay's obligation, not Raydium's."});
   e("admin","prewards", pP.rewards.amt, 0.25, {kind:"pay",name:"rewards payout",
-     note:"0.25%, pool phase only — 1712 of 10000 bps. Destination still undecided."});
-  e("admin","pmf", cP.mf.amt+pP.mf.amt, 0.73, {kind:"pay",name:"MF payout",
-     note:"0.75% on the curve (6000 bps), 0.71% in the pool (4863 bps). Absorbs the LP harvest, so MF alone carries the base-mint exposure."});
+     note:"0.25%, pool phase only — 1754 of 10000 bps. Destination still undecided."});
+  e("admin","pmf", cP.mf.amt+pP.mf.amt, 0.7125, {kind:"pay",name:"MF payout",
+     note:"0.75% on the curve (6000 bps), 0.675% in the pool (4737 bps). Absorbs the LP harvest, so MF alone carries the base-mint exposure."});
 
   return {N,E,m};
 }
